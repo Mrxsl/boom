@@ -272,7 +272,7 @@ if __name__ == '__main__':
  
     root.title("爱心")
  
-    center_window(root, CANVAS_WIDTH, CANVAS_HEIGHT)  # 窗口居中显示
+    center_window(root, CANVAS_WIDTH, CANVAS_HEIGHT)  # 窗口居中显示 
  
     canvas = Canvas(root, bg='black', height=CANVAS_HEIGHT, width=CANVAS_WIDTH)
  
