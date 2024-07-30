@@ -17,15 +17,40 @@
     canvas {
         display: block;
     }
+    .glowing-text {
+        font-family: Arial, sans-serif;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 50px; /* Adjust as needed */
+        animation: colorChange 4s ease-in-out infinite alternate, sizeChange 3s ease-in-out infinite alternate;
+        text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #b39ddb, 0 0 70px #b39ddb, 0 0 80px #b39ddb, 0 0 100px #b39ddb;
+        pointer-events: none; /* Ensures text is not interactive */
+    }
+    @keyframes colorChange {
+        0% { color: #b39ddb; }
+        25% { color: #ce93d8; }
+        50% { color: #f48fb1; }
+        75% { color: #ffcc80; }
+        100% { color: #b2dfdb; }
+    }
+    @keyframes sizeChange {
+        from { transform: translate(-50%, -50%) scale(1); }
+        to { transform: translate(-50%, -50%) scale(1.1); }
+    }
 </style>
 </head>
 <body>
 <canvas id="heartCanvas"></canvas>
+<div id="glowText" class="glowing-text">肖世林生日快乐</div>
 <script>
 const canvas = document.getElementById('heartCanvas');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+
+// Existing particle and animation logic remains unchanged...
 
 const particleCount = 3000;
 const edgeParticles = [];
@@ -211,10 +236,12 @@ const render = () => {
     });
 
     // Draw the text
-    ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-    ctx.font = `${50 * globalScale}px Arial`;
+    ctx.font = `${30 * globalScale}px Arial`;
     ctx.textAlign = 'center';
-    ctx.fillText('肖世林生日快乐', canvas.width / 2, canvas.height / 2);
+
+    // Draw the glowing text
+    const glowText = document.getElementById('glowText');
+    glowText.style.fontSize = `${30 * globalScale}px`;
 
     // Update the scale factor
     globalScale += scaleDirection * 0.0015;
