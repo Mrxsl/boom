@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Particle Heart with Snow and Meteor Animation</title>
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #000;
+    }
+    canvas {
+        display: block;
+    }
+</style>
+</head>
+<body>
+<canvas id="heartCanvas"></canvas>
+<script>
+const canvas = document.getElementById('heartCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const particleCount = 3000;
+const edgeParticles = [];
+const freeParticles = [];
+const snowflakes = [];
+const meteors = [];
+const maxParticles = 1000;
+const particleRadius = 2;
+const snowflakeCount = 200;
+const meteorCount = 5;
+let globalScale = 1;
+const maxScale = 1.1;
+const minScale = 0.9;
+let scaleDirection = 1;
+
+// Math function to create heart shape
+const heartShape = (t) => {
+    return [
+        16 * Math.pow(Math.sin(t), 3),
+        13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)
+    ];
+};
+
+// Generate initial particles along the heart path with random distribution
+for (let i = 0; i < particleCount; i++) {
+    const t = (Math.PI * 2 * i) / particleCount;
+    const [x, y] = heartShape(t);
+    const offsetX = (Math.random() - 0.5) * 30;
+    const offsetY = (Math.random() - 0.5) * 30;
+    edgeParticles.push({ x: x * 15 + offsetX, y: -y * 15 + offsetY, alpha: Math.random() });
+}
+
+// Function to create new random particles around the heart path
+const createRandomParticles = () => {
+    const newParticles = 15;
+    for (let i = 0; i < newParticles; i++) {
+        if (freeParticles.length < maxParticles) {
+            const particle = edgeParticles[Math.floor(Math.random() * edgeParticles.length)];
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 15 + Math.random() * 30;
+            freeParticles.push({
+                x: particle.x + Math.cos(angle) * radius,
+                y: particle.y + Math.sin(angle) * radius,
+                alpha: 1
+            });
+        }
+    }
+};
+
+// Function to create snowflakes
+const createSnowflakes = () => {
+    for (let i = 0; i < snowflakeCount; i++) {
+        snowflakes.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 3 + 1,
+            d: Math.random() * 1
+        });
+    }
+};
+
+// Function to draw and update snowflakes
+const drawSnowflakes = () => {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.beginPath();
+    for (let i = 0; i < snowflakeCount; i++) {
+        const f = snowflakes[i];
+        ctx.moveTo(f.x, f.y);
+        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true);
+    }
+    ctx.fill();
+    updateSnowflakes();
+};
+
+// Update snowflakes' position
+const updateSnowflakes = () => {
+    for (let i = 0; i < snowflakeCount; i++) {
+        const f = snowflakes[i];
+        f.y += Math.pow(f.d, 2) + 1;
+        if (f.y > canvas.height) {
+            f.y = -10;
+            f.x = Math.random() * canvas.width;
+        }
+    }
+};
+
+// Create random meteors
+const createMeteors = () => {
+    for (let i = 0; i < meteorCount; i++) {
+        meteors.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * -canvas.height,
+            length: Math.random() * 100 + 50,
+            speed: Math.random() * 4 + 4, // Increase speed
+            opacity: Math.random() * 0.5 + 0.5,
+            life: Math.random() * 60 + 30 // Lifetime in frames
+        });
+    }
+};
+
+// Draw and update meteors
+const drawMeteors = () => {
+    meteors.forEach((meteor, index) => {
+        ctx.strokeStyle = `rgba(255, 255, 255, ${meteor.opacity})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(meteor.x, meteor.y);
+        ctx.lineTo(meteor.x + meteor.length, meteor.y + meteor.length);
+        ctx.stroke();
+
+        // Update meteor position and opacity
+        meteor.x += meteor.speed;
+        meteor.y += meteor.speed;
+        meteor.opacity -= 0.02; // Gradual fade out
+
+        // Decrease meteor life and reset when life is over
+        meteor.life--;
+        if (meteor.life <= 0) {
+            meteors[index] = {
+                x: Math.random() * canvas.width,
+                y: Math.random() * -canvas.height,
+                length: Math.random() * 100 + 50,
+                speed: Math.random() * 4 + 4,
+                opacity: Math.random() * 0.5 + 0.5,
+                life: Math.random() * 60 + 30
+            };
+        }
+    });
+};
+
+// Function to update the edge particles' alpha values and regenerate them
+const updateEdgeParticles = () => {
+    edgeParticles.forEach(p => {
+        p.alpha -= 0.02;
+        if (p.alpha <= 0) {
+            p.alpha = 1;
+        }
+    });
+};
+
+// Render the scene
+const render = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw snowflakes
+    drawSnowflakes();
+
+    // Draw meteors
+    drawMeteors();
+
+    // Draw heart particles as the outline
+    edgeParticles.forEach(p => {
+        ctx.fillStyle = `rgba(255, 105, 180, ${p.alpha})`;
+        ctx.beginPath();
+        ctx.arc(
+            p.x * globalScale + canvas.width / 2,
+            p.y * globalScale + canvas.height / 2,
+            particleRadius * globalScale,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+    });
+
+    // Draw random particles
+    freeParticles.forEach((p, index) => {
+        ctx.fillStyle = `rgba(255, 105, 180, ${p.alpha})`;
+        ctx.beginPath();
+        ctx.arc(
+            p.x * globalScale + canvas.width / 2,
+            p.y * globalScale + canvas.height / 2,
+            particleRadius * globalScale,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+
+        // Update particle properties for animation
+        p.alpha -= 0.02;
+        if (p.alpha <= 0) {
+            freeParticles.splice(index, 1);
+        }
+    });
+
+    // Draw the text
+    ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+    ctx.font = `${50 * globalScale}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.fillText('肖世林生日快乐', canvas.width / 2, canvas.height / 2);
+
+    // Update the scale factor
+    globalScale += scaleDirection * 0.0015;
+
+    // Reverse the scaling direction if limits are reached
+    if (globalScale >= maxScale) {
+        scaleDirection = -1;
+    } else if (globalScale <= minScale) {
+        scaleDirection = 1;
+    }
+
+    updateEdgeParticles();
+    createRandomParticles();
+    requestAnimationFrame(render);
+};
+
+createSnowflakes();
+createMeteors();
+render();
+</script>
+</body>
+</html>
