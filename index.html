@@ -113,7 +113,58 @@
                     const x = rect.left + rect.width / 2;
                     const y = window.innerHeight - (rect.top + rect.height / 2);
 
-                    const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange'];
+                    const colors = [
+					"#D3D3D3", // LightGray
+					"#A9A9A9", // DarkGray
+					"#778899", // LightSlateGray
+					"#708090", // SlateGray
+					"#2F4F4F", // DarkSlateGray
+					"#B0C4DE", // LightSteelBlue
+					"#4682B4", // SteelBlue
+					"#5F9EA0", // CadetBlue
+					"#6495ED", // CornflowerBlue
+					"#7B68EE", // MediumSlateBlue
+					"#6A5ACD", // SlateBlue
+					"#483D8B", // DarkSlateBlue
+					"#4169E1", // RoyalBlue
+					"#000080", // Navy
+					"#191970", // MidnightBlue
+					"#F0F8FF", // AliceBlue
+					"#E6E6FA", // Lavender
+					"#D8BFD8", // Thistle
+					"#DDA0DD", // Plum
+					"#EE82EE", // Violet
+					"#DA70D6", // Orchid
+					"#FF00FF", // Magenta/Fuchsia
+					"#BA55D3", // MediumOrchid
+					"#9932CC", // DarkOrchid
+					"#9400D3", // DarkViolet
+					"#8A2BE2", // BlueViolet
+					"#4B0082", // Indigo
+					"#800080", // Purple
+					"#9370DB", // MediumPurple
+					"#8B008B", // DarkMagenta
+					"#FF1493", // DeepPink
+					"#FF69B4", // HotPink
+					"#FFB6C1", // LightPink
+					"#FFC0CB", // Pink
+					"#DC143C", // Crimson
+					"#FFF0F5", // LavenderBlush
+					"#FAEBD7", // AntiqueWhite
+					"#F5F5DC", // Beige
+					"#FFE4C4", // Bisque
+					"#FFEBCD", // BlanchedAlmond
+					"#F5DEB3", // Wheat
+					"#DEB887", // BurlyWood
+					"#D2B48C", // Tan
+					"#BC8F8F", // RosyBrown
+					"#F4A460", // SandyBrown
+					"#DAA520", // Goldenrod
+					"#B8860B", // DarkGoldenRod
+					"#CD853F", // Peru
+					"#D2691E", // Chocolate
+					"#8B4513"  // SaddleBrown
+					];
                     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
                     createExplosion(x, y, randomColor);
