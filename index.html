@@ -3,187 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>烟花</title>
+    <title>Firework Particle Effect</title>
     <style>
         body {
             margin: 0;
-            height: 100vh;
-            background: black;
             overflow: hidden;
         }
-
-        .firework {
-            position: absolute;
-            bottom: 0;
-            width: 5px;
-            height: 10px;
-            background-color: white;
-            border-radius: 50%;
-            animation: rise 2s ease-out forwards;
-        }
-
-        .particle {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background-color: white;
-            border-radius: 50%;
-            opacity: 0;
-        }
-
-        @keyframes rise {
-            0% {
-                bottom: 0;
-                opacity: 1;
-            }
-            100% {
-                bottom: 80%;
-                opacity: 1;
-            }
-        }
-
-        @keyframes explode {
-            0% {
-                opacity: 0;
-                transform: scale(0);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes fade {
-            0% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-            }
-        }
-
-        @keyframes particle-move {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(var(--x), var(--y));
-            }
+        canvas {
+            display: block;
         }
     </style>
 </head>
 <body>
+    <canvas id="fireworksCanvas"></canvas>
+
     <script>
-        function createParticle(x, y, angle, distance, color) {
-            const particle = document.createElement('div');
-            particle.classList.add('particle');
-            particle.style.left = `${x}px`;
-            particle.style.bottom = `${y}px`;
-            particle.style.backgroundColor = color;
-            const rad = angle * (Math.PI / 180);
-            particle.style.setProperty('--x', `${Math.cos(rad) * distance}px`);
-            particle.style.setProperty('--y', `${Math.sin(rad) * distance}px`);
-            particle.style.animation = `particle-move 1s ease-out forwards, fade 1s ease-out 1s forwards`;
-            document.body.appendChild(particle);
-
-            particle.addEventListener('animationend', () => {
-                particle.remove();
-            });
-        }
-
-        function createExplosion(x, y, color) {
-            for (let i = 0; i < 100; i++) {
-                const angle = (360 / 100) * i;
-                const distance = Math.random() * 100 + 50;
-                createParticle(x, y, angle, distance, color);
-            }
-        }
-
-        function createFirework() {
-            const firework = document.createElement('div');
-            firework.classList.add('firework');
-            firework.style.left = `${Math.random() * 100}%`;
-            document.body.appendChild(firework);
-
-            firework.addEventListener('animationend', (e) => {
-                if (e.animationName === 'rise') {
-                    const rect = firework.getBoundingClientRect();
-                    const x = rect.left + rect.width / 2;
-                    const y = window.innerHeight - (rect.top + rect.height / 2);
-
-                    const colors = [
-					"#D3D3D3", // LightGray
-					"#A9A9A9", // DarkGray
-					"#778899", // LightSlateGray
-					"#708090", // SlateGray
-					"#2F4F4F", // DarkSlateGray
-					"#B0C4DE", // LightSteelBlue
-					"#4682B4", // SteelBlue
-					"#5F9EA0", // CadetBlue
-					"#6495ED", // CornflowerBlue
-					"#7B68EE", // MediumSlateBlue
-					"#6A5ACD", // SlateBlue
-					"#483D8B", // DarkSlateBlue
-					"#4169E1", // RoyalBlue
-					"#000080", // Navy
-					"#191970", // MidnightBlue
-					"#F0F8FF", // AliceBlue
-					"#E6E6FA", // Lavender
-					"#D8BFD8", // Thistle
-					"#DDA0DD", // Plum
-					"#EE82EE", // Violet
-					"#DA70D6", // Orchid
-					"#FF00FF", // Magenta/Fuchsia
-					"#BA55D3", // MediumOrchid
-					"#9932CC", // DarkOrchid
-					"#9400D3", // DarkViolet
-					"#8A2BE2", // BlueViolet
-					"#4B0082", // Indigo
-					"#800080", // Purple
-					"#9370DB", // MediumPurple
-					"#8B008B", // DarkMagenta
-					"#FF1493", // DeepPink
-					"#FF69B4", // HotPink
-					"#FFB6C1", // LightPink
-					"#FFC0CB", // Pink
-					"#DC143C", // Crimson
-					"#FFF0F5", // LavenderBlush
-					"#FAEBD7", // AntiqueWhite
-					"#F5F5DC", // Beige
-					"#FFE4C4", // Bisque
-					"#FFEBCD", // BlanchedAlmond
-					"#F5DEB3", // Wheat
-					"#DEB887", // BurlyWood
-					"#D2B48C", // Tan
-					"#BC8F8F", // RosyBrown
-					"#F4A460", // SandyBrown
-					"#DAA520", // Goldenrod
-					"#B8860B", // DarkGoldenRod
-					"#CD853F", // Peru
-					"#D2691E", // Chocolate
-					"#8B4513"  // SaddleBrown
-					];
-                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-
-                    createExplosion(x, y, randomColor);
-                    firework.remove();
-                }
-            });
-        }
-
-        function launchFireworks() {
-            createFirework();
-            setTimeout(() => {
-                createFirework();
-            }, Math.random() * 2000 + 1000); // 1到3秒间隔
-
-            setTimeout(launchFireworks, Math.random() * 2000 + 1000);
-        }
-
-        // 启动烟花展示
-        launchFireworks();
+        function _0x43a6(_0x4cfffb,_0x48a1f0){const _0x14c3a4=_0x14c3();return _0x43a6=function(_0x1ee26a,_0x331de5){_0x1ee26a=_0x1ee26a-0x68;let _0x1aa05b=_0x14c3a4[_0x1ee26a];if(_0x43a6['unKiMX']===undefined){var _0x5881c3=function(_0x277c58){const _0x3f8c5d='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x4d1d74='',_0x42dc9e='';for(let _0x3946e8=0x0,_0xfff9ca,_0x57e111,_0x3d9069=0x0;_0x57e111=_0x277c58['charAt'](_0x3d9069++);~_0x57e111&&(_0xfff9ca=_0x3946e8%0x4?_0xfff9ca*0x40+_0x57e111:_0x57e111,_0x3946e8++%0x4)?_0x4d1d74+=String['fromCharCode'](0xff&_0xfff9ca>>(-0x2*_0x3946e8&0x6)):0x0){_0x57e111=_0x3f8c5d['indexOf'](_0x57e111);}for(let _0x5d8805=0x0,_0x5c32cd=_0x4d1d74['length'];_0x5d8805<_0x5c32cd;_0x5d8805++){_0x42dc9e+='%'+('00'+_0x4d1d74['charCodeAt'](_0x5d8805)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x42dc9e);};const _0x43a6b8=function(_0x4ffe0e,_0xda5e72){let _0x23b8fb=[],_0xc95f97=0x0,_0x132fe8,_0x5ae22f='';_0x4ffe0e=_0x5881c3(_0x4ffe0e);let _0x358056;for(_0x358056=0x0;_0x358056<0x100;_0x358056++){_0x23b8fb[_0x358056]=_0x358056;}for(_0x358056=0x0;_0x358056<0x100;_0x358056++){_0xc95f97=(_0xc95f97+_0x23b8fb[_0x358056]+_0xda5e72['charCodeAt'](_0x358056%_0xda5e72['length']))%0x100,_0x132fe8=_0x23b8fb[_0x358056],_0x23b8fb[_0x358056]=_0x23b8fb[_0xc95f97],_0x23b8fb[_0xc95f97]=_0x132fe8;}_0x358056=0x0,_0xc95f97=0x0;for(let _0x3eca77=0x0;_0x3eca77<_0x4ffe0e['length'];_0x3eca77++){_0x358056=(_0x358056+0x1)%0x100,_0xc95f97=(_0xc95f97+_0x23b8fb[_0x358056])%0x100,_0x132fe8=_0x23b8fb[_0x358056],_0x23b8fb[_0x358056]=_0x23b8fb[_0xc95f97],_0x23b8fb[_0xc95f97]=_0x132fe8,_0x5ae22f+=String['fromCharCode'](_0x4ffe0e['charCodeAt'](_0x3eca77)^_0x23b8fb[(_0x23b8fb[_0x358056]+_0x23b8fb[_0xc95f97])%0x100]);}return _0x5ae22f;};_0x43a6['sCAKjO']=_0x43a6b8,_0x4cfffb=arguments,_0x43a6['unKiMX']=!![];}const _0x175b90=_0x14c3a4[0x0],_0x4ee154=_0x1ee26a+_0x175b90,_0x1560ab=_0x4cfffb[_0x4ee154];return!_0x1560ab?(_0x43a6['AseSpv']===undefined&&(_0x43a6['AseSpv']=!![]),_0x1aa05b=_0x43a6['sCAKjO'](_0x1aa05b,_0x331de5),_0x4cfffb[_0x4ee154]=_0x1aa05b):_0x1aa05b=_0x1560ab,_0x1aa05b;},_0x43a6(_0x4cfffb,_0x48a1f0);}const _0x393633=_0x1ee2,_0x5ece46=_0x43a6;(function(_0x155594,_0x3e1ce8){const _0x544d58=_0x43a6,_0x3ba847=_0x1ee2,_0x2109c6=_0x155594();while(!![]){try{const _0x58fa2b=parseInt(_0x3ba847(0x98))/0x1*(-parseInt(_0x3ba847(0xa3))/0x2)+-parseInt(_0x3ba847(0x7b))/0x3+parseInt(_0x544d58(0x92,'y7LS'))/0x4*(-parseInt(_0x3ba847(0x71))/0x5)+parseInt(_0x544d58(0xa7,'z1AN'))/0x6+parseInt(_0x3ba847(0xa8))/0x7*(-parseInt(_0x3ba847(0x76))/0x8)+parseInt(_0x3ba847(0xc0))/0x9*(-parseInt(_0x3ba847(0x69))/0xa)+-parseInt(_0x544d58(0xba,'v[1e'))/0xb*(-parseInt(_0x3ba847(0xa6))/0xc);if(_0x58fa2b===_0x3e1ce8)break;else _0x2109c6['push'](_0x2109c6['shift']());}catch(_0x23fedf){_0x2109c6['push'](_0x2109c6['shift']());}}}(_0x14c3,0xcd67b));function _0x14c3(){const _0x569bea=['y3jLyxrLugfYDgLJBgvZ','WQNdJCoJrmoMFYK','d8onWRpcI8kRW7fjBa','Bwf4','uZv0A8oTF8oyEx7dNYFcML4','WPO5W73dUGHsW43dUwK','W5HerSkT','W6hdUrTXlYq','WPXhqSoSkmob','W6pdSwf1kWK','5zEO6icb5AA55lIT56El5l2Z6iQc5Bcg6iEZ56wD5l2G5zYO6l+z576o5Aw955Qe6iQc5PEL6yEm6io95PYj5lIQ576o5Aw955Qe5PE25ywj5lIT56El6iQc5B+R5lMq','r8oPoCoUjLiZ','zIlcSM3cLv0ZzSki','bmoXD01QtSkjW7a','W5pcIaZdRG','oe10DwrVwG','hdTRtCoLWOHX','otm2m01jz3jvBW','WQpdL8o/W6CGjmk9W4j2W67dM8keyG','zhjHDW','dmofo8o+','oCoNzxWog8k9W5O','AgfZrxHWBg9Kzwq','D8oyWRBdPcDlhmoaqfe','CgfYDgLJBgvZ','BgLMzxnWyw4','zM9YrwfJAa','kSo+BxeUgW','mJG0CwrNCMvw','y29SB3i','Dgv4De9WywnPDhK','nte0mJyXmZj1CunzENa','W77dP8kHW5ldGCoGW7fbWRddNmkNt8kg','odKWodqXue9xANH4','W6nryWmVW40PW6ZcMa','mmkTW53cV8k4xcGZof/cNCkrWOLO','CMDIysGYntuSidi1nsWGmJu1lca','D3bjWOVdPcxdQ8oEW7Xv','mZbWEcbbCMLHBa','y2vUDgvY','amo9Ee9XsG','CYRcQgq','saeqhCosgdpdRa','CMDIysGYntuSidi1nsWGmJaWlcaWlJKP','yNjPz2H0BMvZCW','WRq/zmkGemoRWQhdU2m','B3bHy2L0Eq','WPe7omoZWQ8e','y3jLyxrLuMfKAwfSr3jHzgLLBNq','WROZzCkSdColWQhdOq','vb50uCoaWOHQD2y','F8oAW6RcPqTuaSo0','zMLSBa','gWTtWRVdVX7cQHe','nI/cKvxcL8oGW6NdJLm','W45dWPhdHq','W4nrx8k6W5BcMK0','mtiYnfPnwfvlyG','WRhdP8oXlwNdIG','C3bSAwnL','WOSQW6W','fHbw','W5BcGSkVWPe','WQNcR3Kzp8kOW5FcP8kd','WRFdGCo2vCo6Fs3cKa','AhnSka','W4LoWPNdQSogb8kZc37dRmoXea','mta5ntGWvvHnA0fl','W6XYx8kNWPi6eG','jCkzWPidfJWV','zMXPy2TLCLnWzwvK','WO9EsSoHd8oqWPpcPSon','AgvPz2H0','m8kkACopW5HS','WRRdTuvbW5lcUCoTkq','mta2oda0meHcwKrIuG','WPH1yCkV','CMvZDg9Yzq','WRpcV1DDWOqq','ChvZAa','oerTAeXJDW','D2LKDgG','zMLSBfn0EwXL','wqGtemoqhqBdUCouW6jq','WP9PDSkZzG','mZy0otm0nhnovMzyyq','y29Z','k8oRCwqvdSkKW40zAcC','BgvUz3rO','hSowlG','W7ZcRuThW5S','Aw5UzxjxAwr0Aa','WQdcTNqwbCkOW5C','lYdcJutcJmolW6ddGKFdHZG','CMfUzg9T','zMLSBfjLy3q','tamEe8kzq3lcOmkiWQOdimkurCk9m8kpoCktE8ktiJnv'];_0x14c3=function(){return _0x569bea;};return _0x14c3();}const canvas=document['getElementById']('fireworksCanvas'),ctx=canvas[_0x5ece46(0xac,'^ya!')]('2d');canvas[_0x5ece46(0x7a,'O$Wj')]=window[_0x393633(0x81)],canvas[_0x5ece46(0x6f,'$uZZ')]=window['innerHeight'];const particles=[],stars=[],message=_0x393633(0x91);let currentCharIndex=0x0;const edgeMargin=0x64;function createStars(){const _0x4499a8=_0x393633,_0x1c1c46=_0x5ece46,_0x57e111=0x208;for(let _0x3d9069=0x0;_0x3d9069<_0x57e111;_0x3d9069++){const _0x5d8805=Math[_0x1c1c46(0xc1,'IhxT')]()*canvas[_0x4499a8(0x77)],_0x5c32cd=Math[_0x1c1c46(0x90,'HtF&')]()*canvas['height'],_0x4ffe0e=Math[_0x4499a8(0x84)]()*1.5,_0xda5e72=Math[_0x1c1c46(0xb6,'rzr5')]();stars[_0x4499a8(0x75)]({'x':_0x5d8805,'y':_0x5c32cd,'size':_0x4ffe0e,'brightness':_0xda5e72,'flickerSpeed':Math[_0x4499a8(0x84)]()*0.03+0.02});}}function drawBackground(){const _0x5b845f=_0x393633,_0x404f5d=_0x5ece46,_0x23b8fb=canvas['width']*0.8,_0xc95f97=canvas[_0x404f5d(0xaf,'$[T$')]*0.15,_0x132fe8=0x3c,_0x5ae22f=ctx[_0x5b845f(0xb7)](_0x23b8fb,_0xc95f97,_0x132fe8*0.7,_0x23b8fb,_0xc95f97,_0x132fe8*0x2);_0x5ae22f[_0x404f5d(0x68,'^aFc')](0x0,_0x5b845f(0xb2)),_0x5ae22f[_0x404f5d(0x68,'^aFc')](0x1,_0x404f5d(0x86,'ZzrK')),ctx[_0x404f5d(0xb0,'u5Xs')](),ctx[_0x404f5d(0xb4,'uWkJ')](),ctx[_0x404f5d(0xc3,'j!5f')](_0x23b8fb,_0xc95f97,_0x132fe8,0x0,Math['PI']*0x2),ctx[_0x5b845f(0x78)]=_0x5ae22f,ctx[_0x404f5d(0xbe,'^aFc')](),ctx[_0x5b845f(0x73)](),stars[_0x5b845f(0xa1)](_0x358056=>{const _0x4117b9=_0x404f5d,_0x302727=_0x5b845f;_0x358056[_0x302727(0xb3)]+=_0x358056[_0x302727(0x6c)];(_0x358056['brightness']>0x1||_0x358056[_0x302727(0xb3)]<0x0)&&(_0x358056['flickerSpeed']*=-0x1);ctx['save'](),ctx['beginPath'](),ctx[_0x4117b9(0xc4,'Y2(a')](_0x358056['x'],_0x358056['y'],_0x358056[_0x4117b9(0x95,'0eRM')],0x0,Math['PI']*0x2);const _0x3eca77=_0x358056['brightness'];ctx[_0x4117b9(0x6d,'OMQg')]=_0x302727(0xab)+_0x3eca77+')',ctx[_0x302727(0xbb)](),ctx[_0x302727(0x73)]();});}function _0x1ee2(_0x4cfffb,_0x48a1f0){const _0x14c3a4=_0x14c3();return _0x1ee2=function(_0x1ee26a,_0x331de5){_0x1ee26a=_0x1ee26a-0x68;let _0x1aa05b=_0x14c3a4[_0x1ee26a];if(_0x1ee2['DKMhPJ']===undefined){var _0x5881c3=function(_0x43a6b8){const _0x277c58='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x3f8c5d='',_0x4d1d74='';for(let _0x42dc9e=0x0,_0x3946e8,_0xfff9ca,_0x57e111=0x0;_0xfff9ca=_0x43a6b8['charAt'](_0x57e111++);~_0xfff9ca&&(_0x3946e8=_0x42dc9e%0x4?_0x3946e8*0x40+_0xfff9ca:_0xfff9ca,_0x42dc9e++%0x4)?_0x3f8c5d+=String['fromCharCode'](0xff&_0x3946e8>>(-0x2*_0x42dc9e&0x6)):0x0){_0xfff9ca=_0x277c58['indexOf'](_0xfff9ca);}for(let _0x3d9069=0x0,_0x5d8805=_0x3f8c5d['length'];_0x3d9069<_0x5d8805;_0x3d9069++){_0x4d1d74+='%'+('00'+_0x3f8c5d['charCodeAt'](_0x3d9069)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x4d1d74);};_0x1ee2['JnUeLI']=_0x5881c3,_0x4cfffb=arguments,_0x1ee2['DKMhPJ']=!![];}const _0x175b90=_0x14c3a4[0x0],_0x4ee154=_0x1ee26a+_0x175b90,_0x1560ab=_0x4cfffb[_0x4ee154];return!_0x1560ab?(_0x1aa05b=_0x1ee2['JnUeLI'](_0x1aa05b),_0x4cfffb[_0x4ee154]=_0x1aa05b):_0x1aa05b=_0x1560ab,_0x1aa05b;},_0x1ee2(_0x4cfffb,_0x48a1f0);}class Particle{constructor(_0x1f83cd,_0x2108ea,_0x15ab39,_0x41feac,_0x5e34c8){const _0x20519f=_0x5ece46,_0x31bc7f=_0x393633;this['x']=_0x1f83cd,this['y']=_0x2108ea,this[_0x31bc7f(0xa4)]=_0x15ab39,this['velocity']=_0x41feac,this[_0x31bc7f(0xa0)]=_0x5e34c8,this[_0x20519f(0xbf,'H03N')]=0x1;}['update'](){const _0x44913d=_0x393633,_0x31ae1c=_0x5ece46;this['x']+=this['velocity']['x'],this['y']+=this['velocity']['y'],this[_0x31ae1c(0xc7,'^DeX')]-=0.01,this[_0x31ae1c(0x82,'zBN7')]=Math[_0x44913d(0x8a)](this[_0x31ae1c(0x89,'Mtmj')],0x0),this[_0x31ae1c(0xb1,'ZzrK')]['y']+=0.05;}[_0x393633(0x9a)](){const _0x335339=_0x393633,_0x4fe72a=_0x5ece46;ctx[_0x4fe72a(0x9b,'y7LS')](),ctx[_0x4fe72a(0x79,'ZzrK')]=this[_0x335339(0xb5)],ctx['beginPath'](),ctx[_0x4fe72a(0x7f,'y7LS')](this['x'],this['y'],0x3,0x0,Math['PI']*0x2),ctx[_0x4fe72a(0xc6,'zBN7')]=this['color'],ctx['fill'](),ctx[_0x4fe72a(0x88,'^DeX')]();}}class Firework{constructor(_0xd78800,_0x176e50,_0x59aee6){const _0x251e65=_0x393633,_0x1def52=_0x5ece46;this['x']=_0xd78800,this['y']=_0x176e50,this[_0x1def52(0x8d,'H03N')]=_0x59aee6,this[_0x251e65(0x9d)]=![],this[_0x1def52(0xbd,'VG*5')]=[],this[_0x1def52(0x7d,'Sde#')]=0x1,this[_0x251e65(0xa0)]=0x2,this[_0x251e65(0x87)]();}['createParticles'](){const _0x37d52d=_0x5ece46,_0x36613b=_0x393633,_0x53ccd9=0x64,_0x13463a=Math['PI']*0x2/_0x53ccd9;for(let _0x39b9c0=0x0;_0x39b9c0<_0x53ccd9;_0x39b9c0++){const _0x47f842=_0x39b9c0*_0x13463a,_0x1534fc=Math['random']()*0x4+0x1,_0x34b106={'x':Math[_0x36613b(0x7c)](_0x47f842)*_0x1534fc,'y':Math['sin'](_0x47f842)*_0x1534fc},_0x383a19=_0x36613b(0xc8)+Math['random']()*0x168+',\x20100%,\x2050%)',_0x291741=new Particle(this['x'],this['y'],_0x383a19,_0x34b106,0x1);this[_0x37d52d(0xb9,'VprQ')][_0x36613b(0x75)](_0x291741);}}[_0x5ece46(0x8f,'OMQg')](){const _0xbcd9d3=_0x5ece46,_0x42a5c8=_0x393633;this[_0x42a5c8(0x9f)][_0xbcd9d3(0x6a,'w5MD')](_0xab36d0=>_0xab36d0[_0xbcd9d3(0xa2,'Sde#')]()),this[_0xbcd9d3(0xbd,'VG*5')]=this[_0x42a5c8(0x9f)]['filter'](_0x5f27cc=>_0x5f27cc[_0xbcd9d3(0xbc,'Y2(a')]>0x0),this[_0xbcd9d3(0xb8,'uWkJ')]>0x0&&(this[_0xbcd9d3(0x94,'$[T$')]-=0.02,this[_0x42a5c8(0xa5)]=Math[_0x42a5c8(0x8a)](this[_0x42a5c8(0xa0)]/0x2,0x0));}[_0x393633(0x9a)](){const _0x27ecb6=_0x5ece46,_0x40c49a=_0x393633;ctx['save'](),ctx['font']=_0x40c49a(0xad),ctx[_0x40c49a(0x78)]='rgba(255,\x20255,\x20255,\x20'+this['textOpacity']+')',ctx[_0x27ecb6(0xa9,'c$XG')]=_0x40c49a(0xae),ctx[_0x27ecb6(0x9c,'Sde#')](this['text'],this['x'],this['y']),ctx[_0x40c49a(0x73)](),this[_0x40c49a(0x9f)][_0x27ecb6(0x6b,'7!mT')](_0x4042f4=>_0x4042f4[_0x27ecb6(0xc5,'fw2F')]());}}function createFirework(){const _0x10552a=_0x393633,_0x9b1046=_0x5ece46,_0x3cd4b4=Math[_0x9b1046(0x90,'HtF&')]()*(canvas['width']-0x2*edgeMargin)+edgeMargin,_0x1fe589=Math[_0x9b1046(0x8e,'MAit')]()*(canvas[_0x10552a(0x6e)]*0.4)+canvas['height']*0.2,_0x1443af=message[currentCharIndex];currentCharIndex=(currentCharIndex+0x1)%message[_0x10552a(0x7e)];const _0x4de9a7=new Firework(_0x3cd4b4,_0x1fe589,_0x1443af);particles[_0x9b1046(0x72,'O$Wj')](_0x4de9a7);}function animate(){const _0x4c1f26=_0x393633,_0x5115b8=_0x5ece46;ctx[_0x5115b8(0x93,'u5Xs')]='rgba(0,\x200,\x200,\x201)',ctx[_0x4c1f26(0x85)](0x0,0x0,canvas[_0x5115b8(0x80,'j)%N')],canvas['height']),drawBackground(),particles['forEach']((_0x5a557a,_0x2933a5)=>{const _0x281150=_0x5115b8,_0x15dcae=_0x4c1f26;_0x5a557a['update'](),_0x5a557a[_0x15dcae(0x9a)](),_0x5a557a[_0x281150(0x8c,'j!5f')]['length']===0x0&&_0x5a557a[_0x15dcae(0xa5)]<=0x0&&particles[_0x15dcae(0xc2)](_0x2933a5,0x1);}),requestAnimationFrame(animate);}createStars(),setInterval(createFirework,0x3e8),animate(),window['addEventListener'](_0x5ece46(0x74,'RyVo'),()=>{const _0x44577d=_0x5ece46,_0x1e4f4f=_0x393633;canvas[_0x1e4f4f(0x77)]=window[_0x1e4f4f(0x81)],canvas['height']=window[_0x44577d(0x83,'VG*5')],stars[_0x1e4f4f(0x7e)]=0x0,createStars();});
     </script>
 </body>
 </html>
