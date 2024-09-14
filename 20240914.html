@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高频率烟花粒子效果</title>
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+}
+canvas {
+    display: block;
+}
+</style>
+</head>
+<body>
+<canvas id="fireworksCanvas"></canvas>
+
+<script>
+// 获取canvas元素和绘图上下文
+const canvas = document.getElementById('fireworksCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// 初始化各种数组和变量
+const particles = []; // 存储烟花粒子
+const launches = []; // 存储烟花发射体
+const stars = []; // 存储背景星星
+const message = "嗨卓琳 好久不见呀 中秋节快乐 惊不惊喜意不意外 给你定做的烟花还算漂亮吧哈哈 希望这小玩意能让你开心 我们虽未能常见 但心意和祝福始终与你同在"; // 要显示的文字
+let currentCharIndex = 0; // 当前显示的字符索引
+let textCompleted = false; // 文字是否显示完毕
+let finaleStarted = false; // 是否开始壮观烟花
+let finaleDuration = 0; // 壮观烟花持续时间
+const finaleTotalDuration = 0; // 壮观烟花总持续时间（帧数）
+const edgeMargin = 100; // 屏幕边缘留白
+const textInterval = 1 * 60; // 两个字符烟花之间的帧间隔
+let textIntervalCounter = 0; // 当前帧计数
+
+// 控制模式切换的变量
+let mode = 'text'; // 当前模式：'text'（文字）, 'finale'（壮观烟花）, 'cooldown'（冷却）
+let cooldownDuration = 0; // 冷却持续时间
+const cooldownTotalDuration = 1 * 60; // 总冷却时间（帧数）
+
+// 创建背景星星
+function createStars() {
+    const starCount = 520;
+    for (let i = 0; i < starCount; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const size = Math.random() * 1.5;
+        const brightness = Math.random();
+        stars.push({ x, y, size, brightness, flickerSpeed: Math.random() * 0.03 + 0.02 });
+    }
+}
+
+// 绘制背景（月亮和星星）
+function drawBackground() {
+    // 绘制月亮
+    const moonX = canvas.width * 0.8;
+    const moonY = canvas.height * 0.2;
+    const moonRadius = 60;
+    const moonGradient = ctx.createRadialGradient(moonX, moonY, moonRadius * 0.7, moonX, moonY, moonRadius * 2);
+    moonGradient.addColorStop(0, 'rgba(255, 255, 200, 0.9)');
+    moonGradient.addColorStop(1, 'rgba(255, 255, 200, 0.0)');
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(moonX, moonY, moonRadius, 0, Math.PI * 2);
+    ctx.fillStyle = moonGradient;
+    ctx.fill();
+    ctx.restore();
+
+    // 绘制星星
+    stars.forEach(star => {
+        star.brightness += star.flickerSpeed;
+        if (star.brightness > 1 || star.brightness < 0) star.flickerSpeed *= -1;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness})`;
+        ctx.fill();
+        ctx.restore();
+    });
+}
+
+// 烟花粒子类
+class Particle {
+    constructor(x, y, color, velocity, lifespan) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.velocity = velocity;
+        this.lifespan = lifespan;
+        this.opacity = 1;
+    }
+
+    // 更新粒子状态
+    update() {
+        this.x += this.velocity.x;
+        this.y += this.velocity.y;
+        this.lifespan -= 0.01;
+        this.opacity = Math.max(this.lifespan, 0);
+        this.velocity.y += 0.05; // 添加重力效果
+    }
+
+    // 绘制粒子
+    draw() {
+        ctx.save();
+        ctx.globalAlpha = this.opacity;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+// 烟花发射类
+class Launch {
+    constructor(x, targetY) {
+        this.x = x;
+        this.y = canvas.height;
+        this.targetY = targetY;
+        this.velocity = { x: 0, y: -10 }; // 增加发射速度
+        this.trail = [];
+        this.exploded = false;
+    }
+
+    // 更新发射状态
+    update() {
+        this.y += this.velocity.y;
+
+        // 创建尾迹粒子
+        const trailParticle = {
+            x: this.x,
+            y: this.y,
+            opacity: 1,
+            size: Math.random() * 4 + 1,
+        };
+
+        this.trail.push(trailParticle);
+
+        // 更新尾迹粒子
+        this.trail.forEach(trail => {
+            trail.opacity -= 0.05;
+            trail.size *= 0.95;
+        });
+
+        // 移除不可见的尾迹粒子
+        this.trail = this.trail.filter(trail => trail.opacity > 0);
+
+        // 到达目标高度时爆炸
+        if (this.y <= this.targetY) {
+            this.exploded = true;
+            createFirework(this.x, this.y);
+        }
+    }
+
+    // 绘制发射体和尾迹
+    draw() {
+        // 绘制尾迹
+        this.trail.forEach(trail => {
+            ctx.save();
+            ctx.globalAlpha = trail.opacity;
+            ctx.beginPath();
+            ctx.arc(trail.x, trail.y, trail.size, 0, Math.PI * 2);
+            ctx.fillStyle = 'gold';
+            ctx.fill();
+            ctx.restore();
+        });
+
+        // 绘制发射体
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'gold';
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+// 烟花爆炸类
+class Firework {
+    constructor(x, y, text) {
+        this.x = x;
+        this.y = y;
+        this.text = text;
+        this.particles = [];
+        this.textOpacity = 1;
+        this.holdTime = 60;
+        this.fadeSpeed = 0.01;
+        this.createParticles();
+    }
+
+    // 创建爆炸粒子
+    createParticles() {
+        const particleCount = 100;
+        const angleStep = (Math.PI * 2) / particleCount;
+        for (let i = 0; i < particleCount; i++) {
+            const angle = i * angleStep;
+            const speed = Math.random() * 4 + 1;
+            const velocity = { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed };
+            const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            const particle = new Particle(this.x, this.y, color, velocity, 1);
+            this.particles.push(particle);
+        }
+    }
+
+    // 更新烟花状态
+    update() {
+        this.particles.forEach(particle => particle.update());
+        this.particles = this.particles.filter(particle => particle.lifespan > 0);
+
+        // 文字显示和淡出逻辑
+        if (this.holdTime > 0) this.holdTime--;
+        else if (this.textOpacity > 0) this.textOpacity -= this.fadeSpeed;
+    }
+
+    // 绘制烟花和文字
+    draw() {
+        // 绘制文字
+        if (this.text) {
+            ctx.save();
+            ctx.font = '30px Arial';
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.textOpacity})`;
+            ctx.textAlign = 'center';
+            ctx.fillText(this.text, this.x, this.y);
+            ctx.restore();
+        }
+
+        // 绘制粒子
+        this.particles.forEach(particle => particle.draw());
+    }
+}
+
+// 创建烟花
+function createFirework(x, y) {
+    if (mode === 'text' && !textCompleted && currentCharIndex < message.length) {
+        const charToDisplay = message[currentCharIndex++];
+        const firework = new Firework(x, y, charToDisplay);
+        particles.push(firework);
+
+        if (currentCharIndex >= message.length) {
+            textCompleted = true;
+        }
+    } else {
+        // 非文字模式：创建普通烟花
+        const firework = new Firework(x, y, null);
+        particles.push(firework);
+    }
+}
+
+// 创建新的烟花发射
+function createLaunch() {
+    const x = Math.random() * (canvas.width - 2 * edgeMargin) + edgeMargin;
+    const targetY = Math.random() * (canvas.height * 0.4) + canvas.height * 0.2;
+    const launch = new Launch(x, targetY);
+    launches.push(launch);
+}
+
+// 开始壮观烟花展示
+function startFinale() {
+    if (!finaleStarted) {
+        finaleStarted = true;
+        finaleDuration = 0;
+        mode = 'finale';
+    }
+}
+
+// 重置到文字模式
+function resetTextMode() {
+    currentCharIndex = 0;
+    textCompleted = false;
+    finaleStarted = false;
+    finaleDuration = 0;
+    mode = 'text';
+}
+
+// 主动画循环
+function animate() {
+    // 清空画布
+    ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 绘制背景
+    drawBackground();
+
+    // 更新和绘制发射体
+    launches.forEach((launch, index) => {
+        launch.update();
+        launch.draw();
+        if (launch.exploded) launches.splice(index, 1);
+    });
+
+    // 更新和绘制烟花
+    particles.forEach((firework, index) => {
+        firework.update();
+        firework.draw();
+        if (firework.particles.length === 0 && firework.textOpacity <= 0) {
+            particles.splice(index, 1);
+        }
+    });
+
+    // 模式切换逻辑
+    if (mode === 'text' && textCompleted && !finaleStarted) {
+        startFinale();
+    }
+
+    if (mode === 'finale') {
+        finaleDuration++;
+        if (finaleDuration <= finaleTotalDuration) {
+            createLaunch();
+        } else {
+            mode = 'cooldown';
+            cooldownDuration = 0;
+        }
+    }
+
+    if (mode === 'cooldown') {
+        cooldownDuration++;
+        if (cooldownDuration >= cooldownTotalDuration) {
+            resetTextMode();
+        }
+    }
+
+    // 文字模式下创建烟花的条件
+    if (mode === 'text') {
+        textIntervalCounter++;
+        if (textIntervalCounter >= textInterval) {
+            createLaunch();
+            textIntervalCounter = 0; // 重置计数器
+        }
+    }
+
+    // 继续动画循环
+    requestAnimationFrame(animate);
+}
+
+// 初始化星星并开始动画
+createStars();
+animate();
+
+// 窗口大小改变时调整画布大小
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
+</body>
+</html>
